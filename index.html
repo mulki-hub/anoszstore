@@ -1,0 +1,276 @@
+<!DOCTYPE html><html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anosz Shop</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f0f0;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+    }
+    header {
+      background: #007bff;
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      font-size: 1.5rem;
+      animation: fadeInDown 1s ease;
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    button {
+      padding: 0.5rem 1rem;
+      margin: 0.25rem;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .dark-mode {
+      background: #121212;
+      color: #fff;
+    }
+    .dark-mode header {
+      background: #222;
+    }
+    #app {
+      padding: 1rem;
+    }
+    .product {
+      border: 1px solid #ddd;
+      padding: 1rem;
+      border-radius: 10px;
+      margin: 1rem 0;
+      background: white;
+    }
+    .product img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+    .cart-btn {
+      background: orange;
+    }
+    .comment-box {
+      margin-top: 1rem;
+    }
+    .comment-box textarea {
+      width: 100%;
+      height: 60px;
+    }
+    .game {
+      aspect-ratio: 16/9;
+      width: 100%;
+      max-width: 320px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    input, select, textarea {
+      margin: 0.25rem 0;
+      padding: 0.5rem;
+      width: 100%;
+      max-width: 300px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Anosz Shop</h1>
+    <div>
+      <button onclick="toggleDarkMode()">🌓</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </header>
+  <div id="app"></div>
+  <script>
+    let currentUser = null;
+    let cart = [];
+    let products = [
+      { name: 'Panel 1GB-Unli', price: 1000, image: 'https://raw.githubusercontent.com/r-natio/cloud/main/uploads/_1753534715316.jpg', desc: 'Panel privat berkualitas.', stok: true },
+      { name: 'Produk B', price: 60000, image: 'https://via.placeholder.com/150/007bff/ffffff?text=Produk+B', desc: 'Produk B terbaik.', stok: true },
+      { name: 'Produk C', price: 70000, image: 'https://via.placeholder.com/150/007bff/ffffff?text=Produk+C', desc: 'Produk C premium.', stok: true },
+      { name: 'Produk D', price: 80000, image: 'https://via.placeholder.com/150/007bff/ffffff?text=Produk+D', desc: 'Produk D favorit.', stok: true },
+      { name: 'Produk E', price: 90000, image: 'https://via.placeholder.com/150/007bff/ffffff?text=Produk+E', desc: 'Produk E terjangkau.', stok: true },
+      { name: 'Produk F', price: 65000, image: 'https://via.placeholder.com/150/007bff/ffffff?text=Produk+F', desc: 'Produk F ringan.', stok: true },
+      { name: 'Produk G', price: 120000, image: 'https://via.placeholder.com/150/007bff/ffffff?text=Produk+G', desc: 'Produk G unggulan.', stok: true },
+      { name: 'Produk H', price: 45000, image: 'https://via.placeholder.com/150/007bff/ffffff?text=Produk+H', desc: 'Produk H irit.', stok: true },
+      { name: 'Produk I', price: 100000, image: 'https://via.placeholder.com/150/007bff/ffffff?text=Produk+I', desc: 'Produk I terbaru.', stok: true },
+      { name: 'Produk J', price: 75000, image: 'https://via.placeholder.com/150/007bff/ffffff?text=Produk+J', desc: 'Produk J eksklusif.', stok: true },
+      { name: 'Produk K', price: 50000, image: 'https://via.placeholder.com/150/007bff/ffffff?text=Produk+K', desc: 'Produk K best seller.', stok: true },
+      { name: 'Produk L', price: 30000, image: 'https://via.placeholder.com/150/007bff/ffffff?text=Produk+L', desc: 'Produk L ekonomis.', stok: true }
+    ];
+    let games = [
+      { name: 'Akun ML Sultan', image: 'https://via.placeholder.com/640x360/0000FF/FFFFFF?text=ML+Sultan', desc: 'Akun ML dengan banyak skin dan rank tinggi.' },
+      { name: 'Akun FF Rare', image: 'https://via.placeholder.com/640x360/FF0000/FFFFFF?text=FF+Rare', desc: 'Akun Free Fire dengan bundle langka.' },
+      { name: 'Akun PUBG Pro', image: 'https://via.placeholder.com/640x360/00FF00/000000?text=PUBG+Pro', desc: 'Akun PUBG dengan win rate tinggi.' },
+      { name: 'Akun Genshin AR50', image: 'https://via.placeholder.com/640x360/FFFF00/000000?text=Genshin+AR50', desc: 'Akun Genshin Impact dengan banyak karakter bintang 5.' },
+      { name: 'Akun Valorant Epic', image: 'https://via.placeholder.com/640x360/FFA500/000000?text=Valorant+Epic', desc: 'Akun Valorant dengan banyak skin senjata.' }
+    ];if (localStorage.getItem('currentUser')) {
+  currentUser = localStorage.getItem('currentUser');
+  showShop();
+} else {
+  showLogin();
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+}
+
+function logout() {
+  localStorage.removeItem('currentUser');
+  currentUser = null;
+  showLogin();
+}
+
+function showLogin() {
+  document.getElementById('app').innerHTML = `
+    <h2>Login</h2>
+    <input id="login-user" placeholder="Username"><br/>
+    <input id="login-pass" placeholder="Password" type="password"><br/>
+    <button onclick="login()">Login</button>
+    <p>Belum punya akun? <button onclick="showRegister()">Daftar</button></p>
+  `;
+}
+
+function showRegister() {
+  document.getElementById('app').innerHTML = `
+    <h2>Daftar</h2>
+    <input id="reg-user" placeholder="Username (3-8 karakter)" /><br/>
+    <input id="reg-pass" placeholder="Password" type="password" /><br/>
+    <button onclick="register()">Daftar</button>
+    <button onclick="showLogin()">Kembali</button>
+  `;
+}
+
+function register() {
+  const user = document.getElementById('reg-user').value;
+  const pass = document.getElementById('reg-pass').value;
+  if (/^[a-zA-Z0-9]{3,8}$/.test(user) && pass) {
+    alert('Akun berhasil dibuat!');
+    showLogin();
+  } else {
+    alert('Username harus 3-8 karakter, huruf atau angka.');
+  }
+}
+
+function login() {
+  const user = document.getElementById('login-user').value;
+  const pass = document.getElementById('login-pass').value;
+  if (user === 'admin' && pass === 'admin123') {
+    currentUser = 'admin';
+  } else if (user && pass) {
+    currentUser = user;
+  } else {
+    alert('Isi semua kolom');
+    return;
+  }
+  localStorage.setItem('currentUser', currentUser);
+  showShop();
+}
+
+function showShop() {
+  let html = `<h2>Katalog Produk</h2>`;
+  products.forEach((p, i) => {
+    html += `
+      <div class="product">
+        <img src="${p.image}" alt="${p.name}"/>
+        <h3>${p.name}</h3>
+        <p>${p.desc}</p>
+        <p>Rp ${p.price.toLocaleString()}</p>
+        ${p.stok ? `<button onclick="addToCart(${i})">Tambah ke Troli</button>` : `<p style='color:red;'>Sold Out</p>`}
+      </div>
+    `;
+  });
+  html += `<hr><h2>Katalog Game</h2>`;
+  games.forEach(g => {
+    html += `
+      <div class="product">
+        <img src="${g.image}" class="game" alt="${g.name}"/>
+        <h3>${g.name}</h3>
+        <p>${g.desc}</p>
+      </div>
+    `;
+  });
+  html += `<hr><button class="cart-btn" onclick="showCart()">🛒 Lihat Troli (${cart.length})</button>`;
+  if (currentUser === 'admin') html += `<button onclick="showAdminPanel()">🔧 Admin Panel</button>`;
+  document.getElementById('app').innerHTML = html;
+}
+
+function addToCart(index) {
+  cart.push(products[index]);
+  alert('Produk ditambahkan ke troli!');
+  showShop();
+}
+
+function showCart() {
+  let total = cart.reduce((sum, item) => sum + item.price, 0);
+  let html = `<h2>Troli Saya</h2>`;
+  cart.forEach(p => {
+    html += `<p>${p.name} - Rp ${p.price.toLocaleString()}</p>`;
+  });
+  html += `<hr><p>Total: Rp ${total.toLocaleString()}</p>`;
+  html += `<button onclick="showShop()">← Kembali</button>`;
+  document.getElementById('app').innerHTML = html;
+}
+
+function showAdminPanel() {
+  let html = `<h2>Admin Panel</h2><table><tr><th>Produk</th><th>Harga</th><th>Status</th><th>Aksi</th></tr>`;
+  products.forEach((p, i) => {
+    html += `
+      <tr>
+        <td>${p.name}</td>
+        <td><input id='price-${i}' type='number' value='${p.price}'/></td>
+        <td>
+          <select id='stok-${i}'>
+            <option value='true' ${p.stok ? 'selected' : ''}>Tersedia</option>
+            <option value='false' ${!p.stok ? 'selected' : ''}>Sold Out</option>
+          </select>
+        </td>
+        <td>
+          <button onclick='updateProduct(${i})'>Simpan</button>
+          <button onclick='deleteProduct(${i})' style='background:red;'>Hapus</button>
+        </td>
+      </tr>
+    `;
+  });
+  html += `</table><br/><button onclick="showShop()">← Kembali</button>`;
+  document.getElementById('app').innerHTML = html;
+}
+
+function updateProduct(i) {
+  products[i].price = parseInt(document.getElementById(`price-${i}`).value);
+  products[i].stok = document.getElementById(`stok-${i}`).value === 'true';
+  alert('Produk diperbarui.');
+  showAdminPanel();
+}
+
+function deleteProduct(i) {
+  if (confirm('Yakin ingin menghapus produk ini?')) {
+    products.splice(i, 1);
+    alert('Produk dihapus.');
+    showAdminPanel();
+  }
+}
+
+  </script>
+</body>
+</html>
